@@ -1,0 +1,35 @@
+{
+  "name": "cortico-world-gal-scene",
+  "version": "0.1.0",
+  "description": "A switchable visual-novel and DSH activity scene for Cortico/Coo, inspired by dafeiyu-vn and DSH-GAL.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "files": ["src", "dist", "assets", "types", "describe.json", "README.md", "LICENSE"],
+  "keywords": ["cortico-world", "cortico", "coopanion", "dsh", "visual-novel", "desktop-pet", "galgame"],
+  "license": "MIT",
+  "author": "zhzaill",
+  "repository": { "type": "git", "url": "https://github.com/zhzaill/coo-world-gal-scene" },
+  "homepage": "https://github.com/zhzaill/coo-world-gal-scene#readme",
+  "bugs": { "url": "https://github.com/zhzaill/coo-world-gal-scene/issues" },
+  "engines": { "node": ">=22" },
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "大肥鱼场景",
+    "webUiClient": "dist/webui.js",
+    "webUiStyle": "dist/webui.css",
+    "describe": "describe.json",
+    "tags": ["creative", "desktop-pet", "dsh"]
+  },
+  "scripts": {
+    "build": "node scripts/build-webui.mjs",
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "tools": [],
+  "events": [
+    {
+      "type": "gal-scene.input",
+      "description": {
+        "zh": "场景页提交的一句用户输入。",
+        "en": "A line submitted from the scene page."
+      },
+      "trigger": "flush"
+    }
+  ]
+}
