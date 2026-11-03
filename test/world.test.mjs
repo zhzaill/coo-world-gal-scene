@@ -1,11 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import definition, { activityOf } from '../src/index.ts';
+import definition, { activityForTool, activityOf } from '../src/index.ts';
 
 const event = (patch = {}) => ({ cursor: 1, type: 'tool.call', ts: '2026-11-03T00:00:00.000Z', source: 'dsh', text: '', origin: 'external', ...patch });
 
 test('maps DSH-GAL activity metadata and common event text deterministically', () => {
   assert.equal(activityOf(event({ meta: { activity: 'waiting' } })), 'waiting');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'approval', name: 'computer_click' } })), 'waiting');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'question' } })), 'waiting');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'error' } })), 'failed');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'reply' } })), 'done');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'turn-start' } })), 'reading');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'tool', name: 'web_search' } })), 'searching');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'tool', name: 'computer_click' } })), 'running');
+  assert.equal(activityOf(event({ type: 'fatfish.notice', meta: { kind: 'tool', name: 'str_replace_editor' } })), 'writing');
+  assert.equal(activityForTool('anything'), 'reading');
   assert.equal(activityOf(event({ type: 'tool.error', text: 'command failed' })), 'failed');
   assert.equal(activityOf(event({ type: 'tool.search', text: 'searching the web' })), 'searching');
   assert.equal(activityOf(event({ type: 'tool.call', text: 'str_replace_editor' })), 'writing');

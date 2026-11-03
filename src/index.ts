@@ -14,14 +14,33 @@ const DESCRIBE: WorldDescribe = {
 
 export function activityOf(event: EventEnvelope): string {
   const explicit = event.meta?.activity;
-  if (typeof explicit === 'string') return explicit;
+  if (typeof explicit === 'string' && ['idle', 'reading', 'writing', 'searching', 'running', 'waiting', 'failed', 'done'].includes(explicit)) return explicit;
+  const kind = event.meta?.kind;
+  if (typeof kind === 'string') {
+    const notices: Record<string, string> = {
+      'turn-start': 'reading', tool: activityForTool(String(event.meta?.name ?? '')),
+      approval: 'waiting', question: 'waiting', error: 'failed',
+      reply: 'done', 'turn-end': 'done', relayed: 'idle',
+      'relay-failed': 'failed', 'relay-dropped': 'failed',
+    };
+    if (notices[kind]) return notices[kind];
+  }
   const type = `${event.type} ${event.source} ${event.text}`.toLowerCase();
-  if (/approval|question|waiting|询问|批准/.test(type)) return 'waiting';
+  if (/approval|question|waiting|询问|批准|等你回答|等待批准/.test(type)) return 'waiting';
   if (/error|failed|失败|错误/.test(type)) return 'failed';
+  if (/turn-start|轮开始/.test(type)) return 'reading';
+  if (/turn-end|turn complete|轮结束|本轮完成/.test(type)) return 'done';
   if (/search|browse|fetch|搜索|网页/.test(type)) return 'searching';
   if (/write|edit|create|patch|写入|编辑/.test(type)) return 'writing';
   if (/run|exec|shell|command|terminal|执行/.test(type)) return 'running';
   if (/assistant|reply|answer|回复/.test(type)) return 'done';
+  return 'reading';
+}
+
+export function activityForTool(name: string): string {
+  if (/str_replace_editor|write|create|edit|save|append|patch|present/i.test(name)) return 'writing';
+  if (/web|search|fetch|browse|http|url/i.test(name)) return 'searching';
+  if (/bash|shell|exec|terminal|python|node|command|computer_/i.test(name)) return 'running';
   return 'reading';
 }
 
@@ -53,7 +72,12 @@ class GalSceneWorld implements World {
     return {
       mode: this.mode,
       activity: this.latestActivity(),
-      events: this.latest.slice(-this.maxLog).map((e) => ({ cursor: e.cursor, type: e.type, ts: e.ts, source: e.source, text: e.text.slice(0, 1000), activity: activityOf(e) })),
+      events: this.latest.slice(-this.maxLog).map((e) => ({
+        cursor: e.cursor, type: e.type, ts: e.ts, source: e.source,
+        text: e.text.slice(0, 1000), activity: activityOf(e),
+        detail: typeof e.meta?.name === 'string' ? e.meta.name : typeof e.meta?.reason === 'string' ? e.meta.reason : '',
+        turn: typeof e.meta?.turn === 'number' ? e.meta.turn : null,
+      })),
     };
   }
   private async send(text: string): Promise<Record<string, unknown>> {

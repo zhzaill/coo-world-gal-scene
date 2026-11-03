@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-gal-scene",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A switchable visual-novel and DSH activity scene for Cortico/Coo, inspired by dafeiyu-vn and DSH-GAL.",
   "type": "module",
   "main": "./src/index.ts",
